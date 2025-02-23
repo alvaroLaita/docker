@@ -15,7 +15,7 @@ services:
       retries: 5
       timeout: 10s
     networks:
-      - docker_backend-network
+      - backend-network
     restart: unless-stopped
 
   wordpress:
@@ -36,8 +36,8 @@ services:
       WORDPRESS_PASSWORD: ${WORDPRESS_PASSWORD}
       WORDPRESS_EMAIL: ${WORDPRESS_EMAIL}
     networks:
-      - docker_frontend-network
-      - docker_backend-network
+      - frontend-network
+      - backend-network
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -50,8 +50,20 @@ services:
       mysql:
         condition: service_healthy
     networks:
-      - docker_frontend-network
+      - frontend-network
+
+  https-portal:
+    image: steveltn/https-portal:1
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      DOMAINS: 'localhost  -> wordpress'  # Reemplaza 'tu-dominio.com' con tu dominio real
+      STAGE: 'development' # Cambia a 'development' para certificados autofirmados
+      # FORCE_HTTPS: 'true' # Opcional: fuerza la redirección a HTTPS
+    networks:
+      - frontend-network
 
 networks:
-  docker_frontend-network:
-  docker_backend-network:
+  frontend-network:
+  backend-network:
